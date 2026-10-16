@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm Định Hướng Nghề Nghiệp Holland (RIASEC)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .option-btn:hover {
+            transform: translateY(-2px);
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    H
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-brand-600 to-emerald-600 bg-clip-text text-transparent">Holland Career VN</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Định hướng nghề nghiệp chuẩn RIASEC</p>
+                </div>
+            </div>
+            <div id="header-progress-text" class="hidden text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full">
+                Câu hỏi <span id="current-q-num">1</span> / <span id="total-q-num">30</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- 1. START SCREEN -->
+        <div id="screen-start" class="fade-in bg-white rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-10 space-y-8">
+            <div class="text-center space-y-4 max-w-2xl mx-auto">
+                <span class="px-3 py-1 bg-brand-50 text-brand-600 text-xs font-semibold rounded-full uppercase tracking-wider">Trắc Nghiệm Hướng Nghiệp</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">Khám Phá Bản Thân & Chọn Nghề Phù Hợp</h2>
+                <p class="text-slate-600 text-base sm:text-lg">
+                    Mô hình Holland (RIASEC) giúp phân loại sở thích nghề nghiệp thành 6 nhóm tính cách. Xác định mã RIASEC của bạn để tìm môi trường làm việc lý tưởng nhất.
+                </p>
+            </div>
+            <div id="resume-banner" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 flex items-center justify-between">
+                <span class="text-sm font-medium"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Bạn có tiến trình bài test chưa hoàn thành!</span>
+                <div class="space-x-2">
+                    <button onclick="clearSavedData()" class="px-3 py-1 text-xs text-amber-700 hover:underline font-medium">Bắt đầu lại</button>
+                    <button onclick="resumeQuiz()" class="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700">Tiếp tục</button>
+                </div>
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="startQuiz()" class="px-8 py-4 bg-gradient-to-r from-brand-600 to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:opacity-95 transition duration-200 w-full sm:w-auto">
+                    Bắt Đầu Trắc Nghiệm <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. QUIZ SCREEN -->
+        <div id="screen-quiz" class="hidden fade-in space-y-6">
+            <!-- Progress Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                <div class="flex justify-between text-xs font-semibold text-slate-500">
+                    <span id="category-label">Nhóm: Realistic</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-brand-500 to-emerald-600 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 sm:p-10 space-y-8">
+                <div class="space-y-3">
+                    <span id="question-badge" class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">Câu hỏi 1/30</span>
+                    <h3 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed min-h-[60px] flex items-center">
+                        Nội dung câu hỏi sẽ hiển thị ở đây...
+                    </h3>
+                </div>
+
+                <!-- Likert Scale Options -->
+                <div class="space-y-3">
+                    <p class="text-xs text-slate-400 font-medium uppercase tracking-wider text-center sm:text-left">Mức độ yêu thích / Phù hợp:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                        <button onclick="selectOption(1)" class="option-btn border-2 border-slate-200 hover:border-brand-500 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center space-y-1 transition text-slate-700 font-medium" data-value="1">
+                            <span class="text-xs text-slate-400 font-semibold">1</span>
+                            <span class="text-sm sm:text-xs text-center">Hoàn toàn không thích</span>
+                        </button>
+                        <button onclick="selectOption(2)" class="option-btn border-2 border-slate-200 hover:border-brand-500 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center space-y-1 transition text-slate-700 font-medium" data-value="2">
+                            <span class="text-xs text-slate-400 font-semibold">2</span>
+                            <span class="text-sm sm:text-xs text-center">Không thích lắm</span>
+                        </button>
+                        <button onclick="selectOption(3)" class="option-btn border-2 border-slate-200 hover:border-brand-500 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center space-y-1 transition text-slate-700 font-medium" data-value="3">
+                            <span class="text-xs text-slate-400 font-semibold">3</span>
+                            <span class="text-sm sm:text-xs text-center">Bình thường / Phân vân</span>
+                        </button>
+                        <button onclick="selectOption(4)" class="option-btn border-2 border-slate-200 hover:border-brand-500 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center space-y-1 transition text-slate-700 font-medium" data-value="4">
+                            <span class="text-xs text-slate-400 font-semibold">4</span>
+                            <span class="text-sm sm:text-xs text-center">Khá thích</span>
+                        </button>
+                        <button onclick="selectOption(5)" class="option-btn border-2 border-slate-200 hover:border-brand-500 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center space-y-1 transition text-slate-700 font-medium" data-value="5">
+                            <span class="text-xs text-slate-400 font-semibold">5</span>
+                            <span class="text-sm sm:text-xs text-center">Rất thích / Phù hợp</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                    <button id="btn-prev" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 transition flex items-center text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-left mr-2"></i> Câu trước
+                    </button>
+                    <button id="btn-next" onclick="nextQuestion()" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 transition flex items-center text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                        Câu sau <i class="fa-solid fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RESULT SCREEN -->
+        <div id="screen-result" class="hidden fade-in space-y-8">
+            <!-- Header Result Card -->
+            <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+                <div class="relative z-10 space-y-4">
+                    <div class="inline-block px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-semibold text-emerald-300 border border-white/10">
+                        Kết Quả Định Hướng Nghề Nghiệp RIASEC
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-slate-300 text-sm">Mã Holland 3 chữ cái cao điểm nhất của bạn:</p>
+                        <h2 id="result-holland-code" class="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
+                            AES (Nghệ thuật - Xã hội - Kinh doanh)
+                        </h2>
+                    </div>
+                    <p id="result-summary-text" class="text-slate-300 italic text-sm sm:text-base max-w-2xl">
+                        "Sự kết hợp giữa tư duy sáng tạo, khả năng kết nối con người và nhạy bén kinh doanh."
+                    </p>
+                </div>
+            </div>
+
+            <!-- Chart & Scores Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Radar Chart -->
+                <div class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-lg border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">Biểu Đồ Khối RIASEC</h3>
+                        <p class="text-xs text-slate-500 mb-4">Sự phân bổ điểm số giữa 6 nhóm sở thích nghề nghiệp.</p>
+                    </div>
+                    <div class="relative w-full aspect-square max-w-[400px] mx-auto">
+                        <canvas id="riasecChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Scores Breakdown -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-lg border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">Bảng Điểm Chi Tiết</h3>
+                        <p class="text-xs text-slate-500 mb-4">Tổng điểm mỗi nhóm (Tối đa 25 điểm / Nhóm)</p>
+                    </div>
+                    <div id="type-scores-list" class="space-y-3 text-sm overflow-y-auto max-h-[360px] pr-2">
+                        <!-- Dynamic list generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analysis Section for Top 3 Groups -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 sm:p-10 space-y-8">
+                <h3 class="text-2xl font-bold text-slate-800 border-b pb-4 border-slate-100 flex items-center">
+                    <i class="fa-solid fa-graduation-cap text-brand-600 mr-3"></i> Phân Tích Chi Tiết 3 Nhóm Nổi Bật Nhất
+                </h3>
+
+                <div id="top-groups-details" class="space-y-8">
+                    <!-- Dynamic details generated by JS -->
+                </div>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+                <button onclick="window.print()" class="w-full sm:w-auto px-6 py-3.5 bg-brand-600 text-white font-bold rounded-xl shadow-md hover:bg-brand-700 transition flex items-center justify-center">
+                    <i class="fa-solid fa-print mr-2"></i> In / Tải Kết Quả
+                </button>
+                <button onclick="resetToHome()" class="w-full sm:w-auto px-6 py-3.5 bg-slate-800 text-white font-bold rounded-xl shadow-md hover:bg-slate-900 transition flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Làm lại bài test
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-5xl mx-auto px-4">
+            <p>Ứng dụng Trắc Nghiệm Hướng Nghiệp Holland (RIASEC). Tài liệu tham khảo chọn ngành nghề phù hợp.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript App Logic -->
+    <script>
+        // ==========================================
+        // DATA SETS: 30 QUESTIONS (5 per RIASEC group) & DETAILS
+        // ==========================================
+
+        const categoriesMeta = {
+            R: { name: "Realistic (Kỹ thuật / Thực tế)", code: "R", color: "#d97706", bgClass: "bg-amber-50", textClass: "text-amber-700" },
+            I: { name: "Investigative (Nghiên cứu / Trí tuệ)", code: "I", color: "#2563eb", bgClass: "bg-blue-50", textClass: "text-blue-700" },
+            A: { name: "Artistic (Nghệ thuật / Sáng tạo)", code: "A", color: "#9333ea", bgClass: "bg-purple-50", textClass: "text-purple-700" },
+            S: { name: "Social (Xã hội / Giúp đỡ)", code: "S", color: "#16a34a", bgClass: "bg-emerald-50", textClass: "text-emerald-700" },
+            E: { name: "Enterprising (Quản lý / Kinh doanh)", code: "E", color: "#e11d48", bgClass: "bg-rose-50", textClass: "text-rose-700" },
+            C: { name: "Conventional (Nghiệp vụ / Quy chuẩn)", code: "C", color: "#4f46e5", bgClass: "bg-indigo-50", textClass: "text-indigo-700" }
+        };
+
+        const questions = [
+            // R: Realistic (Q1 - Q5)
+            { type: 'R', text: "Sửa chữa các thiết bị điện trong nhà, máy móc hoặc đồ dùng gia dụng." },
+            { type: 'R', text: "Lắp ráp, chế tạo các mô hình, đồ thủ công hoặc các sản phẩm cơ khí." },
+            { type: 'R', text: "Làm việc ngoài trời, chăm sóc cây trồng, vật nuôi hoặc tham gia xây dựng." },
+            { type: 'R', text: "Sử dụng các công cụ, dụng cụ cầm tay hoặc máy móc kỹ thuật." },
+            { type: 'R', text: "Tìm hiểu cách vận hành của các cấu trúc phần cứng máy tính hoặc động cơ xe." },
+
+            // I: Investigative (Q6 - Q10)
+            { type: 'I', text: "Đọc sách khoa học, tạp chí chuyên ngành hoặc tìm hiểu các hiện tượng tự nhiên." },
+            { type: 'I', text: "Giải quyết các bài toán phức tạp, suy luận logic hoặc phân tích dữ liệu nghiên cứu." },
+            { type: 'I', text: "Thực hiện các thí nghiệm trong phòng thí nghiệm hóa học, sinh học hoặc vật lý." },
+            { type: 'I', text: "Nghiên cứu nguyên nhân cốt lõi của một vấn đề kỹ thuật hoặc xã hội." },
+            { type: 'I', text: "Lập trình phần mềm, thuật toán hoặc phân tích hệ thống dữ liệu số." },
+
+            // A: Artistic (Q11 - Q15)
+            { type: 'A', text: "Vẽ tranh, thiết kế đồ họa, trang trí nội thất hoặc sáng tạo nghệ thuật thị giác." },
+            { type: 'A', text: "Viết truyện ngắn, thơ ca, kịch bản hoặc sáng tạo nội dung văn học." },
+            { type: 'A', text: "Biểu diễn âm nhạc, chơi nhạc cụ, ca hát hoặc tham gia diễn xuất kịch." },
+            { type: 'A', text: "Chụp ảnh nghệ thuật, quay phim và biên tập video sáng tạo." },
+            { type: 'A', text: "Tự do thể hiện ý tưởng độc đáo mà không bị ràng buộc bởi các quy chuẩn cứng nhắc." },
+
+            // S: Social (Q16 - Q20)
+            { type: 'S', text: "Giúp đỡ người khác giải quyết khó khăn, tư vấn tâm lý hoặc hướng dẫn học tập." },
+            { type: 'S', text: "Tham gia các hoạt động tình nguyện cộng đồng, công tác xã hội, từ thiện." },
+            { type: 'S', text: "Giảng dạy, huấn luyện hoặc đào tạo kỹ năng cho học sinh, nhân viên." },
+            { type: 'S', text: "Lắng nghe tâm sự, chia sẻ và hòa giải các mâu thuẫn giữa mọi người." },
+            { type: 'S', text: "Làm việc trong các đội nhóm đông người, xây dựng mối quan hệ gắn kết." },
+
+            // E: Enterprising (Q21 - Q25)
+            { type: 'E', text: "Lãnh đạo một nhóm dự án, tổ chức sự kiện hoặc điều hành một đội ngũ." },
+            { type: 'E', text: "Thuyết phục người khác ủng hộ ý tưởng, sản phẩm hoặc dự án kinh doanh của mình." },
+            { type: 'E', text: "Kinh doanh buôn bán, tìm kiếm cơ hội đầu tư và phát triển thị trường." },
+            { type: 'E', text: "Tham gia tranh biện, đàm phán hợp đồng hoặc ký kết thỏa thuận thương mại." },
+            { type: 'E', text: "Đặt ra mục tiêu tài chính lớn và tìm cách chinh phục thành công." },
+
+            // C: Conventional (Q26 - Q30)
+            { type: 'C', text: "Quản lý hồ sơ, sổ sách, phân loại tài liệu và sắp xếp dữ liệu có hệ thống." },
+            { type: 'C', text: "Lập bảng tính Excel, tính toán số liệu tài chính, kế toán hoặc kiểm toán." },
+            { type: 'C', text: "Tuân thủ nghiêm ngặt các quy trình, quy định hành chính chuẩn hóa." },
+            { type: 'C', text: "Kiểm tra lỗi chi tiết trong văn bản, hợp đồng hoặc báo cáo công việc." },
+            { type: 'C', text: "Sắp xếp không gian làm việc gọn gàng, ngăn nắp và đúng trật tự." }
+        ];
+
+        const groupDetails = {
+            R: {
+                title: "R - Realistic (Nhóm Kỹ thuật / Thực tế)",
+                traits: "Thực tế, thích làm việc với đồ vật, máy móc, cây cối, động vật hoặc các công cụ kỹ thuật. Thích các hoạt động ngoài trời hoặc thực hành.",
+                environment: "Xưởng cơ khí, công trường xây dựng, phòng thí nghiệm kỹ thuật, nông trại, không gian mở ngoài trời.",
+                careers: ["Kỹ sư cơ khí / điện", "Kiến trúc sư", "Kỹ thuật viên IT / Phần cứng", "Phi công / Thuyền trưởng", "Chuyên gia nông nghiệp công nghệ cao"]
+            },
+            I: {
+                title: "I - Investigative (Nhóm Nghiên cứu / Trí tuệ)",
+                traits: "Ham học hỏi, thích tư duy logic, phân tích, tìm tòi nguyên nhân sự việc và giải quyết các bài toán khoa học phức tạp.",
+                environment: "Viện nghiên cứu, phòng thí nghiệm, trường đại học, công ty công nghệ cao, trung tâm phân tích dữ liệu.",
+                careers: ["Nhà khoa học nghiên cứu", "Chuyên gia phân tích dữ liệu (Data Analyst)", "Lập trình viên / Kỹ sư AI", "Bác sĩ / Dược sĩ", "Chuyên gia kinh tế / Tài chính"]
+            },
+            A: {
+                title: "A - Artistic (Nhóm Nghệ thuật / Sáng tạo)",
+                traits: "Sáng tạo, có trí tưởng tượng phong phú, yêu cái đẹp, thích tự do thể hiện bản thân qua các hình thức nghệ thuật.",
+                environment: "Studio nghệ thuật, công ty quảng cáo / truyền thông, đài truyền hình, nhà xuất bản, không gian làm việc tự do (freelance).",
+                careers: ["Thiết kế đồ họa / UI-UX Designer", "Biên kịch / Nhà văn / Copywriter", "Đạo diễn / Quay phim / Nhiếp ảnh gia", "Nhạc sĩ / Ca sĩ / Diễn viên", "Kiến trúc sư nội thất"]
+            },
+            S: {
+                title: "S - Social (Nhóm Xã hội / Giúp đỡ)",
+                traits: "Thân thiện, thấu cảm, thích giao tiếp, giảng dạy, chăm sóc, hỗ trợ và mang lại giá trị tích cực cho cộng đồng.",
+                environment: "Trường học, bệnh viện, tổ chức phi chính phủ (NGO), trung tâm tư vấn tâm lý, cơ quan dịch vụ công cộng.",
+                careers: ["Giáo viên / Giảng viên", "Chuyên gia tâm lý / Tư vấn viên", "Nhân viên công tác xã hội", "Chăm sóc khách hàng / Quảnệ nhân sự (HR)", "Bác sĩ / Y tá"]
+            },
+            E: {
+                title: "E - Enterprising (Nhóm Quản lý / Kinh doanh)",
+                traits: "Năng động, tự tin, có khả năng thuyết phục, lãnh đạo, thích cạnh tranh và chinh phục các mục tiêu kinh tế lớn.",
+                environment: "Doanh nghiệp thương mại, ngân hàng, công ty khởi nghiệp (startup), sàn giao dịch, môi trường kinh doanh năng động.",
+                careers: ["Giám đốc điều hành (CEO) / Quản lý", "Chuyên viên kinh doanh / Sales Manager", "Nhà sáng lập Startup", "Chuyên gia marketing / PR", "Luật sư / Nhà môi giới bất động sản"]
+            },
+            C: {
+                title: "C - Conventional (Nhóm Nghiệp vụ / Quy chuẩn)",
+                traits: "Cẩn thận, tỉ mỉ, có trách nhiệm cao, thích làm việc với các con số, văn bản, số liệu và quy trình chuẩn hóa rõ ràng.",
+                environment: "Văn phòng công ty, ngân hàng, cơ quan thuế, phòng kế toán, cơ quan hành chính nhà nước.",
+                careers: ["Kế toán viên / Kiểm toán viên", "Chuyên viên ngân hàng / Giao dịch viên", "Thư ký / Trợ lý hành chính", "Chuyên viên pháp chế", "Quản lý kho / Kiểm soát chất lượng (QA/QC)"]
+            }
+        };
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(questions.length).fill(0);
+        let chartInstance = null;
+
+        // Load saved progress on startup
+        window.onload = function() {
+            const saved = localStorage.getItem('holland_quiz_state');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data && data.answers && data.currentIndex > 0) {
+                        document.getElementById('resume-banner').classList.remove('hidden');
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = new Array(questions.length).fill(0);
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            document.getElementById('header-progress-text').classList.remove('hidden');
+            document.getElementById('total-q-num').innerText = questions.length;
+            renderQuestion();
+        }
+
+        function resumeQuiz() {
+            const saved = localStorage.getItem('holland_quiz_state');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    userAnswers = data.answers;
+                    currentQuestionIndex = data.currentIndex < questions.length ? data.currentIndex : 0;
+                } catch(e) {
+                    currentQuestionIndex = 0;
+                }
+            }
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            document.getElementById('header-progress-text').classList.remove('hidden');
+            document.getElementById('total-q-num').innerText = questions.length;
+            renderQuestion();
+        }
+
+        function clearSavedData() {
+            localStorage.removeItem('holland_quiz_state');
+            document.getElementById('resume-banner').classList.add('hidden');
+            startQuiz();
+        }
+
+        function saveProgress() {
+            const state = {
+                answers: userAnswers,
+                currentIndex: currentQuestionIndex
+            };
+            localStorage.setItem('holland_quiz_state', JSON.stringify(state));
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestionIndex];
+            const meta = categoriesMeta[q.type];
+
+            document.getElementById('current-q-num').innerText = currentQuestionIndex + 1;
+            document.getElementById('question-badge').innerText = `Câu hỏi ${currentQuestionIndex + 1}/${questions.length} • Nhóm ${q.type}`;
+            document.getElementById('category-label').innerText = `Nhóm đặc trưng: ${meta.name}`;
+            document.getElementById('question-text').innerText = q.text;
+
+            // Progress bar
+            const percent = ((currentQuestionIndex) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-percentage').innerText = Math.round(percent) + '%';
+
+            // Highlight selected option if any
+            const val = userAnswers[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                const btnVal = parseInt(btn.getAttribute('data-value'));
+                if (btnVal === val) {
+                    btn.classList.add('border-brand-500', 'bg-brand-50');
+                } else {
+                    btn.classList.remove('border-brand-500', 'bg-brand-50');
+                }
+            });
+
+            // Prev/Next buttons state
+            document.getElementById('btn-prev').disabled = currentQuestionIndex === 0;
+            const nextBtn = document.getElementById('btn-next');
+            if (val === 0) {
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.disabled = false;
+            }
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.innerHTML = 'Xem kết quả <i class="fa-solid fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = 'Câu sau <i class="fa-solid fa-chevron-right ml-2"></i>';
+            }
+        }
+
+        function selectOption(value) {
+            userAnswers[currentQuestionIndex] = value;
+            saveProgress();
+            renderQuestion();
+
+            // Auto advance after short delay if not last question
+            setTimeout(() => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                } else {
+                    // Enable next button for submission view
+                    document.getElementById('btn-next').disabled = false;
+                }
+            }, 200);
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (userAnswers[currentQuestionIndex] === 0) return;
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function calculateScores() {
+            const scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+            questions.forEach((q, idx) => {
+                scores[q.type] += userAnswers[idx];
+            });
+            return scores;
+        }
+
+        function showResults() {
+            localStorage.removeItem('holland_quiz_state');
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('header-progress-text').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const scores = calculateScores();
+
+            // Sort scores descending to get Holland code top 3
+            const sortedTypes = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+            const top3 = sortedTypes.slice(0, 3);
+            const hollandCode = top3.join('');
+
+            // Set Header Result Title
+            let codeDescription = top3.map(t => categoriesMeta[t].name.split(' ')[0]).join(' - ');
+            document.getElementById('result-holland-code').innerText = `${hollandCode} (${codeDescription})`;
+            document.getElementById('result-summary-text').innerText = `Mã RIASEC (${hollandCode}) phản ánh thế mạnh nổi bật của bạn trong việc kết hợp các nhóm tố chất cốt lõi.`;
+
+            // Render Chart
+            renderChart(scores);
+
+            // Render Scores Breakdown List
+            const listEl = document.getElementById('type-scores-list');
+            listEl.innerHTML = '';
+            sortedTypes.forEach(type => {
+                const score = scores[type];
+                const meta = categoriesMeta[type];
+                const maxScore = 25; // 5 questions * 5 pts max
+                const pct = (score / maxScore) * 100;
+
+                const item = document.createElement('div');
+                item.className = `p-3 ${meta.bgClass} rounded-xl border border-slate-100 flex items-center justify-between`;
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-xs px-2 py-0.5 rounded text-white" style="background-color: ${meta.color}">${meta.code}</span>
+                        <span class="font-medium text-xs text-slate-700 ml-2">${meta.name.split(' ')[0]}</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-24 bg-slate-200 h-2 rounded-full overflow-hidden hidden sm:block">
+                            <div class="h-full rounded-full" style="width: ${pct}%; background-color: ${meta.color}"></div>
+                        </div>
+                        <span class="font-bold text-sm text-slate-800">${score}/25</span>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            // Render Top 3 Detailed Analysis
+            const detailsContainer = document.getElementById('top-groups-details');
+            detailsContainer.innerHTML = '';
+            top3.forEach((type, index) => {
+                const info = groupDetails[type];
+                const meta = categoriesMeta[type];
+
+                const block = document.createElement('div');
+                block.className = `p-6 ${meta.bgClass} rounded-2xl border border-slate-200/60 space-y-4`;
+                block.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-sm shadow" style="background-color: ${meta.color}">#${index + 1}</span>
+                        <h4 class="text-lg font-bold text-slate-900">${info.title}</h4>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-1">
+                            <span class="font-semibold text-slate-700 block text-xs uppercase text-brand-700">Đặc điểm tính cách</span>
+                            <p class="text-slate-600 text-xs">${info.traits}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-1">
+                            <span class="font-semibold text-slate-700 block text-xs uppercase text-brand-700">Môi trường làm việc</span>
+                            <p class="text-slate-600 text-xs">${info.environment}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-1">
+                            <span class="font-semibold text-slate-700 block text-xs uppercase text-brand-700">Gợi ý nghề nghiệp</span>
+                            <p class="text-slate-600 text-xs font-medium">${info.careers.join(', ')}</p>
+                        </div>
+                    </div>
+                `;
+                detailsContainer.appendChild(block);
+            });
+        }
+
+        function renderChart(scores) {
+            const ctx = document.getElementById('riasecChart').getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const labels = ['Realistic (R)', 'Investigative (I)', 'Artistic (A)', 'Social (S)', 'Enterprising (E)', 'Conventional (C)'];
+            const dataValues = [scores.R, scores.I, scores.A, scores.S, scores.E, scores.C];
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Điểm số RIASEC',
+                        data: dataValues,
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                        borderColor: '#16a34a',
+                        pointBackgroundColor: '#15803d',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#15803d',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e2e8f0' },
+                            grid: { color: '#e2e8f0' },
+                            pointLabels: {
+                                font: { family: 'Inter', size: 11, weight: '600' },
+                                color: '#334155'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                max: 25,
+                                stepSize: 5,
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function resetToHome() {
+            localStorage.removeItem('holland_quiz_state');
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('header-progress-text').classList.add('hidden');
+            document.getElementById('screen-start').classList.remove('hidden');
+            document.getElementById('resume-banner').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
